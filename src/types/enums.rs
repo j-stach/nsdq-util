@@ -29,6 +29,8 @@ macro_rules! define_enum {
         }
 
 
+        // TODO Add function for encode match
+
     }
 }
 
