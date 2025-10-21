@@ -8,14 +8,11 @@ string:
 - [ ] FixStr14
 - [ ] StockSymbol
 - [ ] FirmId
-enums:
-- [x] macro export
-- [x] add encode method generator
 bool:
-- [ ] Y/N boolean
-- [ ] Y/N/U Ternean
+- [x] Y/N boolean
+- [x] Y/N/U Ternean
 time:
-- [ ] parser for nanosec timestamp
+- [x] parser for nanosec timestamp
 price:
 - [ ] Price32
 - [ ] Price64
@@ -23,6 +20,7 @@ price:
 
 ### error
 - [ ] NsdqTypeError
+- [ ] InvalidTime error for time exceeding 86400 secs
 
 
 ## Testing
