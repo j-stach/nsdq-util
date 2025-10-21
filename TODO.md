@@ -9,8 +9,8 @@ string:
 - [ ] StockSymbol
 - [ ] FirmId
 enums:
-- [ ] macro export
-- [ ] add encode method generator
+- [x] macro export
+- [x] add encode method generator
 bool:
 - [ ] Y/N boolean
 - [ ] Y/N/U Ternean
@@ -24,4 +24,8 @@ price:
 ### error
 - [ ] NsdqTypeError
 
+
+## Testing
+- [ ] Doc comments contain tests & demonstrations
+- [ ] Test code export through external module
 
