@@ -1,0 +1,72 @@
+
+use crate::error::BadElementError;
+
+/// Handling instructions for routing and execution behavior
+/// (e.g., liquidity sourcing and interaction with other markets).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HandleInst {
+
+    /// Imbalance only (CrossType::Opening & CrossType::Closing)
+    ImbalanceOnly,
+
+    /// Retail order type 1 (CrossType::Retail)
+    RetailOrder1,
+
+    /// Retail order type 2 (CrossType::Retail)
+    RetailOrder2,
+
+    /// Retail price improvement (CrossType::Retail)
+    RetailPriceImprovement,
+
+    /// Extended Life + Continuous (CrossType::ExtendedLife)
+    ExtendedContinuous,
+
+    /// Direct Listing Capital Raise (CrossType::Halt)
+    DirectListingCapitalRaise,
+
+    /// No handling instructions.
+    NoInstructions
+}
+
+impl HandleInst {
+
+    pub(crate) fn parse(data: u8) -> Result<Self, BadElementError> {
+
+        use HandleInst::*;
+        match data {
+            b'I' => Ok(ImbalanceOnly),
+            b'O' => Ok(RetailOrder1),
+            b'T' => Ok(RetailOrder2),
+            b'Q' => Ok(RetailPriceImprovement),
+            b'B' => Ok(ExtendedContinuous),
+            b'D' => Ok(DirectListingCapitalRaise),
+            b' ' => Ok(NoInstructions),
+
+            _ => Err(BadElementError::InvalidEnum(
+                (data as char).to_string(), 
+                "HandleInst".to_string()
+            ))
+        }
+    }
+
+    pub(crate) fn encode(&self) -> u8 {
+        
+        use HandleInst::*;
+        match self {
+             ImbalanceOnly              => b'I',
+             RetailOrder1               => b'O',
+             RetailOrder2               => b'T',
+             RetailPriceImprovement     => b'Q',
+             ExtendedContinuous         => b'B',
+             DirectListingCapitalRaise  => b'D',
+             NoInstructions             => b' ',
+        }
+    }
+
+}
+
+impl Default for HandleInst {
+    fn default() -> Self {
+        HandleInst::NoInstructions
+    }
+}

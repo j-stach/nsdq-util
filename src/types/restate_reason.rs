@@ -1,0 +1,41 @@
+
+use crate::error::BadElementError;
+
+/// Reason why an order was restated.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RestateReason {
+
+    /// Refresh of display (on an order with reserves)
+    Refresh,
+
+    /// Update of displayed price
+    Update
+}
+
+impl RestateReason {
+
+    pub(crate) fn parse(data: u8) -> Result<Self, BadElementError> {
+
+        use RestateReason::*;
+        match data {
+            b'R' => Ok(Refresh),
+            b'P' => Ok(Update),
+
+            _ => Err(BadElementError::InvalidEnum(
+                (data as char).to_string(), 
+                "RestateReason".to_string()
+            ))
+        }
+    }
+
+    #[allow(dead_code)] // Future use
+    pub(crate) fn encode(&self) -> u8 {
+        
+        use RestateReason::*;
+        match self {
+            Refresh => b'R',
+            Update  => b'P',
+        }
+    }
+
+}
