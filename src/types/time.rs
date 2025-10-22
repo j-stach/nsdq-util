@@ -10,7 +10,7 @@ pub fn parse_nanosecs(input: &[u8]) -> nom::IResult<&[u8], chrono::NaiveTime> {
 
     // TODO: TBD: Is this safe to expect?
     // It is the same convention used by OUCH, so it should not be invalid.
-    let time = NaiveTime::from_num_seconds_from_midnight_opt(secs, nano)
+    let time = chrono::NaiveTime::from_num_seconds_from_midnight_opt(secs, nano)
         .expect("Timestamp is a valid time");
 
     Ok((input, time))
