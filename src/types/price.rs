@@ -1,4 +1,6 @@
 
+use crate::error::TypeError;
+
 /// Prices are integer fields, supplied with an associated precision. 
 /// When converted to a decimal format, prices are in fixed point format, 
 /// where `N` defines the number of decimal places. 
@@ -9,24 +11,26 @@ pub struct Price<I, const N: u8> {
     val: I,
 }
 
-impl<I: Copy + PartialOrd, const N: u8> Price<I, N> where i64: From<I> {
+impl<I: Copy + PartialOrd + std::fmt::Display, const N: u8> Price<I, N> 
+    where i64: From<I> 
+{
 
     /// The maximum price one would need to create is $199,999.9900,
     /// which is the maximum order price for OUCH.
     ///```
     /// use nsdq_util::types::Price;
     ///
-    /// let price = Price<u32, 4>::new(35000u32);
+    /// let price = Price<u32, 4>::new(35000u32).unwrap();
     /// let (dollars, cents) = price.parts();
     /// assert_eq!(dollars, 3u32);
     /// assert_eq!(cents, 5000u32);
     ///```
-    pub fn new(val: I) -> Option<Self> {
+    pub fn new(val: I) -> Result<Self, TypeError> {
         // Should always be in range
         if i64::from(val) <= 199_999_9900i64 {
-            Some(Self { val })
+            Ok(Self { val })
         } else {
-            None
+            Err(TypeError::InvalidPrice(format!("{}", val)))
         }
     }
 

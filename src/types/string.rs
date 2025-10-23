@@ -58,6 +58,8 @@ define_str!{ FixStr8 [8usize] "Wrappable string type with fixed length 8." }
 define_str!{ FixStr14 [14usize] "Wrappable string type with fixed length 14." }
 
 
+use crate::error::TypeError;
+
 define_str!{ 
     FirmId [4usize] 
         "Strong type for firm IDs that ensures protocol compliance." 
@@ -71,14 +73,17 @@ impl FirmId {
 
     // TODO Error type
     /// Generate a new FirmId from a protocol-compliant string.
-    pub fn from(s: impl AsRef<str>) -> Option<Self> {
+    pub fn from(s: impl AsRef<str>) -> Result<Self, TypeError> {
 
         let s = s.as_ref();
         if helper::is_uppercase(s) {
             let fs = helper::fixed_str::<4>(s);
-            Some(FirmId(fs))
+            Ok(FirmId(fs))
         } else {
-            None
+            Err(TypeError::InvalidString(
+                String::from("FirmId"),
+                s.to_string()
+            ))
         }
     }
 }
@@ -97,14 +102,17 @@ impl StockSymbol {
 
     // TODO Error type
     /// Generate a new StockSymbol from a protocol-compliant string.
-    pub fn from(s: impl AsRef<str>) -> Option<Self> {
+    pub fn from(s: impl AsRef<str>) -> Result<Self, TypeError> {
 
         let s = s.as_ref();
         if helper::is_alpha(s) {
             let fs = helper::fixed_str::<8>(s);
-            Some(StockSymbol(fs))
+            Ok(StockSymbol(fs))
         } else {
-            None
+            Err(TypeError::InvalidString(
+                String::from("StockSymbol"),
+                s.to_string()
+            ))
         }
     }
 }
