@@ -1,6 +1,20 @@
 
-// TODO Docs example
+/// Define a fixed-length string type.
+/// ```
+/// use nsdq_util::define_str;
 ///
+/// define_str!(MyStr [4usize] "String with a fixed length of 4 characters.");
+///
+/// let bytes = b"XXXX";
+/// let (_, mystr) = MyStr::parse(bytes).unwrap();
+///
+/// assert_eq!(mystr.encode(), *bytes);
+/// assert_eq!(mystr.to_str(), "XXXX");
+///
+/// assert_eq!(format!("{}", mystr), String::from("XXXX"));
+/// ```
+/// NOTE: `new` or `from_str` functions are not included in this macro,
+/// in case there are special constraints on the character types.
 #[macro_export] macro_rules! define_str {
     ($name:ident [$len:expr] $doc:expr) => {
 
@@ -33,7 +47,10 @@
             pub fn encode(&self) -> [u8; $len] { self.0 }
 
             /// Character compliance should be checked when created.
-            pub fn to_string(&self) -> &str {
+            ///
+            /// # Panics
+            /// Will panic if the string contains non-UTF8 characters.
+            pub fn to_str(&self) -> &str {
                 std::str::from_utf8(&self.0)
                     .expect("Character compliance should be checked by type")
                     .trim_end()
@@ -45,7 +62,7 @@
                 &self, 
                 f: &mut std::fmt::Formatter<'_>
             ) -> std::fmt::Result {
-                self.to_string().fmt(f)
+                self.to_str().fmt(f)
             }
         }
 
@@ -71,8 +88,15 @@ impl Default for FirmId {
 
 impl FirmId {
 
-    // TODO Error type
     /// Generate a new FirmId from a protocol-compliant string.
+    /// Must be four uppercase ASCII characters.
+    /// ```
+    /// use nsdq_util::FirmId;
+    ///
+    /// assert!(FirmId::from("FIRM").is_ok());
+    /// assert!(FirmId::from("Firm").is_err());
+    /// assert!(FirmId::from("F1RM").is_err());
+    /// ```
     pub fn from(s: impl AsRef<str>) -> Result<Self, TypeError> {
 
         let s = s.as_ref();
@@ -100,8 +124,16 @@ impl Default for StockSymbol {
 
 impl StockSymbol {
 
-    // TODO Error type
     /// Generate a new StockSymbol from a protocol-compliant string.
+    /// Must be up to eight alphabetic ASCII characters.
+    /// ```
+    /// use nsdq_util::StockSymbol;
+    ///
+    /// assert!(StockSymbol::from("STOCKSYM").is_ok());
+    /// assert!(StockSymbol::from("Stonks").is_ok());
+    /// assert!(StockSymbol::from("Stonks  ").is_err());
+    /// assert!(StockSymbol::from("St0nks").is_err());
+    /// ```
     pub fn from(s: impl AsRef<str>) -> Result<Self, TypeError> {
 
         let s = s.as_ref();
@@ -120,7 +152,7 @@ impl StockSymbol {
 
 pub mod helper {
 
-    /// Pads a string up to length `N` with spaces.
+    /// Creates a fixed-length string, padding up to length `N` with spaces.
     pub fn fixed_str<const N: usize>(s: &str) -> [u8; N] {
         let mut buf = [b' '; N];
         let chars = s.as_bytes();
@@ -139,8 +171,15 @@ pub mod helper {
         s.chars().all(|c| c.is_ascii_alphabetic())
     }
 
-    /// Checks if all characters are alphanumeric or whitespace.
+    /// Checks if all characters are alphanumeric or spaces.
     /// (e.g. for CIOrdId)
+    /// ```
+    /// use nsdq_util::types::string::helper::is_alphanumeric;
+    ///
+    /// assert!(is_alphanumeric("Xy 1"));
+    /// assert!(is_alphanumeric(""));
+    /// assert!(!is_alphanumeric("Xy 1!"));
+    /// ```
     pub fn is_alphanumeric(s: &str) -> bool {
         s.chars().all(|c| c.is_ascii_alphanumeric() || c == ' ')
     }

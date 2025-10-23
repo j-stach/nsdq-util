@@ -11,7 +11,7 @@ pub struct Price<I, const N: u8> {
     val: I,
 }
 
-impl<I: num::traits::PrimInt + std::fmt::Display, const N: u8> Price<I, N> {
+impl<I: num_traits::PrimInt + std::fmt::Display, const N: u8> Price<I, N> {
 
     /// The maximum price one would need to create is $199,999.9900,
     /// which is the maximum order price for OUCH.
