@@ -1,7 +1,5 @@
 
-use nsdq_util::define_enum;
-
-define_enum!{
+nsdq_util::define_enum!{
     MyEnum:
         "This is my strong type for a character-based protocol enum.";
 
@@ -12,7 +10,6 @@ define_enum!{
 }
 
 #[test] fn enum_test() {
-
 
     let bytes = b"AB";
 
@@ -28,5 +25,19 @@ define_enum!{
     bytes.extend(MyEnum::VariantB.encode());
 
     assert_eq!(&bytes, b"AB");
+}
+
+
+nsdq_util::define_str!(MyStr [4usize] "String with a fixed length of 4.");
+
+#[test] fn str_test() {
+
+    let bytes = b"XXXX";
+    let (_, mystr) = MyStr::parse(bytes).unwrap();
+
+    assert_eq!(mystr.encode(), *bytes);
+    assert_eq!(mystr.to_str(), "XXXX");
+
+    assert_eq!(format!("{}", mystr), String::from("XXXX"));
 }
 
