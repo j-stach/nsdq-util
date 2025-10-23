@@ -16,4 +16,5 @@ exclude = [".git/**", "test/**", "TODO.md"]
 [dependencies]
 chrono = { version = "0.4.41", default-features = false, features = ["std"] }
 nom = "8.0.0"
+num = { version = "0.4.3", default-features = false }
 

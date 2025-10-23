@@ -5,18 +5,14 @@ pub mod types;
 pub use types::{
 
     string::{
-        //FixStr4,
-        //FixStr8,
-        //FixStr14,
-        //FirmId,
-        //StickSymbol,
+        FixStr4,
+        FixStr8,
+        FixStr14,
+        FirmId,
+        StockSymbol,
     },
 
-    price::{
-        //Price32,
-        //Price64,
-        //SignedPrice,
-    },
+    price::Price,
 
     time::parse_nanosecs,
 
