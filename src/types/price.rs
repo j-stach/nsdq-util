@@ -11,23 +11,32 @@ pub struct Price<I, const N: u8> {
     val: I,
 }
 
-impl<I: Copy + PartialOrd + std::fmt::Display, const N: u8> Price<I, N> 
-    where i64: From<I> 
-{
+impl<I: num::traits::PrimInt + std::fmt::Display, const N: u8> Price<I, N> {
 
     /// The maximum price one would need to create is $199,999.9900,
     /// which is the maximum order price for OUCH.
+    /// NOTE: This function will always fail for N < 2 
+    /// (cannot create whole dollars without a fractional component).
     ///```
-    /// use nsdq_util::types::Price;
+    /// use nsdq_util::Price;
     ///
-    /// let price = Price<u32, 4>::new(35000u32).unwrap();
+    /// let price = Price::<u32, 4>::new(35000u32).unwrap();
     /// let (dollars, cents) = price.parts();
     /// assert_eq!(dollars, 3u32);
     /// assert_eq!(cents, 5000u32);
     ///```
     pub fn new(val: I) -> Result<Self, TypeError> {
+
+        if N < 2 {
+            return Err(TypeError::InvalidPrice(String::from("N")))
+        }
+
         // Should always be in range
-        if i64::from(val) <= 199_999_9900i64 {
+        // Subtract 2 to account for $0.99
+        let mag = I::from(10).unwrap().pow((N as u32) - 2);
+        let limit = I::from(199_999_99).unwrap() * mag;
+
+        if val <= limit {
             Ok(Self { val })
         } else {
             Err(TypeError::InvalidPrice(format!("{}", val)))
@@ -38,6 +47,21 @@ impl<I: Copy + PartialOrd + std::fmt::Display, const N: u8> Price<I, N>
     pub fn val(&self) -> I { self.val }
 }
 
+
+/// `Price<u32, 4>` is used for added orders in ITCH.
+///```
+/// use nsdq_util::Price;
+///
+/// let price = Price::<u32, 4>::new(35000u32).unwrap();
+/// let (dollars, cents) = price.parts();
+/// assert_eq!(dollars, 3u32);
+/// assert_eq!(cents, 5000u32);
+///
+/// let bytes = 35000u32.to_be_bytes();
+/// let (_, price2) = Price::<u32, 4>::parse(&bytes).unwrap();
+/// assert_eq!(price, price2);
+/// assert_eq!(price.encode(), bytes);
+///```
 impl<const N: u8> Price<u32, N> {
 
     /// Returns whole dollars, remainder (cents)
@@ -60,6 +84,21 @@ impl<const N: u8> Price<u32, N> {
     }
 }
 
+
+/// `Price<i32, 4>` is used for setting peg offsets in OUCH.
+///```
+/// use nsdq_util::Price;
+///
+/// let price = Price::<i32, 4>::new(-35000i32).unwrap();
+/// let (dollars, cents) = price.parts();
+/// assert_eq!(dollars, -3i32);
+/// assert_eq!(cents, 5000u32);
+///
+/// let bytes = (-35000i32).to_be_bytes();
+/// let (_, price2) = Price::<i32, 4>::parse(&bytes).unwrap();
+/// assert_eq!(price, price2);
+/// assert_eq!(price.encode(), bytes);
+///```
 impl<const N: u8> Price<i32, N> {
 
     /// Returns whole dollars, remainder (cents)
@@ -82,6 +121,36 @@ impl<const N: u8> Price<i32, N> {
     }
 }
 
+
+/// `Price<u64, 4>` is used for order entry in OUCH,
+/// and `Price<u64, 8>` is used for the MWCB levels in ITCH.
+///```
+/// use nsdq_util::Price;
+///
+/// // Price<u64, 4>
+///
+/// let price = Price::<u64, 4>::new(3_5000u64).unwrap();
+/// let (dollars, cents) = price.parts();
+/// assert_eq!(dollars, 3u64);
+/// assert_eq!(cents, 5000u64);
+///
+/// let bytes = 3_5000u64.to_be_bytes();
+/// let (_, price2) = Price::<u64, 4>::parse(&bytes).unwrap();
+/// assert_eq!(price, price2);
+/// assert_eq!(price.encode(), bytes);
+///
+/// // Price<u64, 8>
+///
+/// let price = Price::<u64, 8>::new(3_5000_0000u64).unwrap();
+/// let (dollars, cents) = price.parts();
+/// assert_eq!(dollars, 3u64);
+/// assert_eq!(cents, 5000_0000u64);
+///
+/// let bytes = 3_5000_0000u64.to_be_bytes();
+/// let (_, price2) = Price::<u64, 8>::parse(&bytes).unwrap();
+/// assert_eq!(price, price2);
+/// assert_eq!(price.encode(), bytes);
+///```
 impl<const N: u8> Price<u64, N> {
 
     /// Returns whole dollars, remainder (cents)
