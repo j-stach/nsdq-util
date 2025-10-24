@@ -9,8 +9,7 @@
 /// 
 ///     ['A'] VariantA
 ///         "This is the first variant for MyEnum.",
-///     ['B'] VariantB
-///         "This is the other variant for MyEnum."
+///     ['B'] VariantB, // This is the other variant, without documentation.
 /// }
 ///
 /// let bytes = b"AB";
@@ -36,10 +35,10 @@
 ///
 /// define_enum!{
 ///
-///     MyEnum2 [2usize] "Enum with fixed tag length 2";
+///     MyEnum2 [2usize] "Enum with tag length of 2 bytes";
 ///
-///     [b"AB"] Var1 "One variant",
-///     [b"XY"] Var2 "Another variant",
+///     [b"AB"] Var1 "Variant with docs",
+///     [b"XY"] Var2, // Undocumented variant
 /// }
 ///
 /// let bytes = b"ABXY";
@@ -51,7 +50,7 @@
 ///
 /// define_enum!{
 ///
-///     MyEnum4 [4usize] "Enum with fixed tag length 2";
+///     MyEnum4 [4usize] "Enum with tag length of 4 bytes";
 ///
 ///     [b"ABCD"] Var1 "Full-length variant",
 ///     [b"XY  "] Var2 "Variant with whitespace",
@@ -69,12 +68,12 @@
 ///
 /// ```
 #[macro_export] macro_rules! define_enum {
-    ($name:ident: $edoc:expr; $([$tag:expr] $kind:ident $kdoc:expr),*$(,)?) => {
+    ($name:ident: $edoc:expr; $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?) => {
 
         #[doc = $edoc]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum $name {$(
-            #[doc = $kdoc]
+            $(#[doc = $kdoc])?
             $kind,
         )*}
 
@@ -105,13 +104,13 @@
     };
 
     ($name:ident [$len:expr] $edoc:expr; 
-        $([$tag:expr] $kind:ident $kdoc:expr),*$(,)?
+        $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?
     ) => {
 
         #[doc = $edoc]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum $name {$(
-            #[doc = $kdoc]
+            $(#[doc = $kdoc])?
             $kind,
         )*}
 

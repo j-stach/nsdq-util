@@ -18,3 +18,6 @@ For NYSE-, NYSE American- and NYSE Arca-listed securities with
 subordinate issue types, please refer to Ticker Symbol Convention page 
 on the Nasdaq Trader website.
 
+## enum macro
+- [x] make docs optional?
+
