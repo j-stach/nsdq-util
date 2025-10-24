@@ -1,5 +1,5 @@
 
-/// 
+/// Ivalid type construction.
 #[derive(Debug)]
 pub enum TypeError {
     InvalidPrice(String),

@@ -68,7 +68,9 @@
 ///
 /// ```
 #[macro_export] macro_rules! define_enum {
-    ($name:ident: $edoc:expr; $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?) => {
+    ($name:ident: $edoc:expr; 
+        $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?
+    ) => {
 
         #[doc = $edoc]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
