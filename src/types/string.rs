@@ -79,7 +79,7 @@ use crate::error::TypeError;
 
 define_str!{ 
     Mpid [4usize] 
-        "Market Participant Identifier (MPID).
+        "Market Participant Identifier (MPID). \
         Used for identifying firms registered with FINRA." 
 }
 
@@ -114,9 +114,25 @@ impl Mpid {
 }
 
 
+
 define_str!{ 
     StockSymbol [8usize] 
-        "Strong type for stock symbols that ensures protocol compliance." 
+        "Strong type for stock symbols that ensures protocol compliance. \
+        Nasdaq currently restricts its symbol length to a maximum of 8 chars. \
+        For common stock issuances, NASDAQ, PSX and BX will only assign root \
+        symbols of 1 to 4 characters in length with possible fifth and or \
+        sixth character denoting a suffix. \n \
+        In certain instances, a dot “.” delimiter may be applied to symbols 
+        after the root and between the suffix e.g., XXXX.A. \n \
+        For subordinate securities, Nasdaq and BX will assign a 5 character \
+        symbol for which the last character relays information about the issue \
+        class or issue type. \n \
+        For the current list of fifth and or six character symbol suffixes, \
+        please refer to Ticker Symbol Convention page on the NasdaqTrader \
+        website. \n \
+        For NYSE-, NYSE American- and NYSE Arca-listed securities with \
+        subordinate issue types, please refer to Ticker Symbol Convention page \
+        on the Nasdaq Trader website."
 }
 
 impl Default for StockSymbol {
@@ -132,13 +148,14 @@ impl StockSymbol {
     ///
     /// assert!(StockSymbol::from("STOCKSYM").is_ok());
     /// assert!(StockSymbol::from("Stonks").is_ok());
+    /// assert!(StockSymbol::from("Stock.XX").is_ok());
     /// assert!(StockSymbol::from("Stonks  ").is_err());
     /// assert!(StockSymbol::from("St0nks").is_err());
     /// ```
     pub fn from(s: impl AsRef<str>) -> Result<Self, TypeError> {
 
         let s = s.as_ref();
-        if helper::is_alpha(s) {
+        if helper::is_alpha_with_suffix(s) {
             let fs = helper::fixed_str::<8>(s);
             Ok(StockSymbol(fs))
         } else {
@@ -162,14 +179,20 @@ pub mod helper {
         buf
     }
 
-    /// Checks if all characters are uppercase alpha. (e.g. for Firm ID.)
+    /// Checks if all characters are uppercase alpha. (e.g. for Mpid)
     pub fn is_uppercase(s: &str) -> bool {
         s.chars().all(|c| c.is_ascii_uppercase())
     }
 
-    /// Checks if all characters are alphabetic. (e.g. for stock symbol.)
+    /// Checks if all characters are alphabetic.
     pub fn is_alpha(s: &str) -> bool {
         s.chars().all(|c| c.is_ascii_alphabetic())
+    }
+
+    /// Checks if all characters are alphabetic or period.
+    /// (e.g. for StockSymbol)
+    pub fn is_alpha_with_suffix(s: &str) -> bool {
+        s.chars().all(|c| c.is_ascii_alphabetic() || c == '.')
     }
 
     /// Checks if all characters are alphanumeric or spaces.
