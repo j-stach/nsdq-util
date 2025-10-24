@@ -78,34 +78,35 @@ define_str!{ FixStr14 [14usize] "Wrappable string type with fixed length 14." }
 use crate::error::TypeError;
 
 define_str!{ 
-    FirmId [4usize] 
-        "Strong type for firm IDs that ensures protocol compliance." 
+    Mpid [4usize] 
+        "Market Participant Identifier (MPID).
+        Used for identifying firms registered with FINRA." 
 }
 
-impl Default for FirmId {
-    fn default() -> Self { FirmId(*b"    ") }
+impl Default for Mpid {
+    fn default() -> Self { Mpid(*b"    ") }
 }
 
-impl FirmId {
+impl Mpid {
 
     /// Generate a new FirmId from a protocol-compliant string.
     /// Must be four uppercase ASCII characters.
     /// ```
-    /// use nsdq_util::FirmId;
+    /// use nsdq_util::Mpid;
     ///
-    /// assert!(FirmId::from("FIRM").is_ok());
-    /// assert!(FirmId::from("Firm").is_err());
-    /// assert!(FirmId::from("F1RM").is_err());
+    /// assert!(Mpid::from("FIRM").is_ok());
+    /// assert!(Mpid::from("Firm").is_err());
+    /// assert!(Mpid::from("F1RM").is_err());
     /// ```
     pub fn from(s: impl AsRef<str>) -> Result<Self, TypeError> {
 
         let s = s.as_ref();
         if helper::is_uppercase(s) {
             let fs = helper::fixed_str::<4>(s);
-            Ok(FirmId(fs))
+            Ok(Mpid(fs))
         } else {
             Err(TypeError::InvalidString(
-                String::from("FirmId"),
+                String::from("MPID"),
                 s.to_string()
             ))
         }

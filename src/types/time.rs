@@ -1,5 +1,5 @@
 
-use chrono::NaiveTime;
+pub use chrono::NaiveTime;
 use crate::error::TypeError;
 
 /// Parse from network-encoded timestamp to Rust-friendly type.

@@ -8,13 +8,17 @@ pub use types::{
         FixStr4,
         FixStr8,
         FixStr14,
-        FirmId,
+        Mpid,
         StockSymbol,
     },
 
     price::Price,
 
-    time::parse_nanosecs,
+    time::{
+        parse_nanosecs,
+        parse_nanosecs_bold,
+        NaiveTime,
+    },
 
     bools::{
         parse_bool_with_chars,
