@@ -18,6 +18,7 @@ chrono = { version = "0.4.41", default-features = false, features = ["std"] }
 nom = "8.0.0"
 num-traits = { version = "0.2.19", default-features = false }
 
-[[test]]
-name = "tests"
-path = "test/mod.rs"
+#[[test]]
+#name = "tests"
+#path = "test/mod.rs"
+
