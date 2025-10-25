@@ -15,8 +15,10 @@ pub use types::{
     price::Price,
 
     time::{
-        parse_nanosecs,
-        parse_nanosecs_bold,
+        parse_ouch_time,
+        parse_ouch_time_bold,
+        parse_itch_time,
+        parse_itch_time_bold,
         NaiveTime,
     },
 
