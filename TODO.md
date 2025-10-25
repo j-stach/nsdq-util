@@ -1,4 +1,4 @@
 
 ## TODO for crate
-- [ ] Ready for publish
+- [x] Ready for publish
 
