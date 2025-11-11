@@ -1,5 +1,5 @@
 
-pub use chrono::NaiveTime;
+pub use chrono::{ NaiveTime, Timelike };
 use crate::error::TypeError;
 
 use nom::{
@@ -53,6 +53,16 @@ pub fn parse_ouch_time_bold(input: &[u8]) -> nom::IResult<&[u8], NaiveTime> {
 
     Ok((input, time))
 } 
+
+/// Encode a timestamp to BE u64, representing nanoseconds from midnight.
+pub fn encode_ouch_time(time: NaiveTime) -> [u8; 8] {
+
+    let secs = time.num_seconds_from_midnight() as u64;
+    let nano = time.nanosecond() as u64;
+
+    let time = secs * 10u64.pow(9) + nano;
+    time.to_be_bytes()
+}
 
 /// Parse from ITCH-encoded timestamp to Rust-friendly type.
 /// Expects to find 6 bytes (not a full u64).
@@ -110,4 +120,6 @@ pub fn parse_itch_time_bold(input: &[u8]) -> nom::IResult<&[u8], NaiveTime> {
 
     Ok((input, time))
 } 
+
+// NOTE: `encode_itch_time` is not necessary.
 

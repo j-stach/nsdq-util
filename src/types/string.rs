@@ -49,7 +49,7 @@
             /// Character compliance should be checked when created.
             ///
             /// # Panics
-            /// Will panic if the string contains non-UTF8 characters.
+            /// Will panic if the string contains invalid UTF8.
             pub fn to_str(&self) -> &str {
                 std::str::from_utf8(&self.0)
                     .expect("Character compliance should be checked by type")

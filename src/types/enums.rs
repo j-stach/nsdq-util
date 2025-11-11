@@ -67,7 +67,33 @@
 /// assert_eq!(&MyEnum4::Var2.encode(), bytes2);
 ///
 /// ```
+///
+/// For `u16` enum variants:
+/// ```
+/// use nsdq_util::define_enum;
+///
+/// define_enum!{
+///
+///     // Note the colon following the identifier is removed:
+///     MyEnum "Enum with u16 tag represented in hexadecimal.";
+///
+///     [0x0001_u16] Var1 "Variant with docs",
+///     [0x0002_u16] Var2, // Undocumented variant
+/// }
+///
+/// let bytes1 = 1u16.to_be_bytes();
+/// let (_, var1) = MyEnum::parse(&bytes1).unwrap();
+/// let bytes2 = 2u16.to_be_bytes();
+/// let (_, var2) = MyEnum::parse(&bytes2).unwrap();
+///
+/// assert_eq!(var1, MyEnum::Var1);
+/// assert_eq!(var2, MyEnum::Var2);
+/// assert_eq!(MyEnum::Var1.encode(), bytes1);
+/// assert_eq!(MyEnum::Var2.encode(), bytes2);
+/// ```
 #[macro_export] macro_rules! define_enum {
+
+    // char tags
     ($name:ident: $edoc:expr; 
         $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?
     ) => {
@@ -82,16 +108,20 @@
         impl $name {
             pub fn parse(input: &[u8]) -> nom::IResult<&[u8], Self> {
 
-                use nom::{ 
-                    Parser, 
-                    branch::alt, 
-                    combinator::map, 
-                    character::char 
-                };
+                use nom::bytes::complete::take;
 
-                let (input, kind) = alt(($(
-                    map(char($tag), |_| Self::$kind),
-                )*)).parse(input)?;
+                let (input, ch) = take(1usize)(input)?;
+                let kind = match ch[0] as char {
+                    $(
+                        $tag => Self::$kind,
+                    )*
+                    _ => return Err(nom::Err::Error(
+                        nom::error::Error::new(
+                            input, 
+                            nom::error::ErrorKind::Tag
+                        )
+                    )),
+                };
 
                 Ok((input, kind))
             }
@@ -102,9 +132,48 @@
                 )*}
             }
         }
-
     };
 
+    // u16-tags
+    ($name:ident $edoc:expr; 
+        $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?
+    ) => {
+
+        #[doc = $edoc]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        pub enum $name {$(
+            $(#[doc = $kdoc])?
+            $kind,
+        )*}
+
+        impl $name {
+            pub fn parse(input: &[u8]) -> nom::IResult<&[u8], Self> {
+
+                let (input, tag) = nom::number::streaming::be_u16(input)?;
+                let kind = match tag {
+                    $(
+                        $tag => Self::$kind,
+                    )*
+                    _ => return Err(nom::Err::Error(
+                        nom::error::Error::new(
+                            input, 
+                            nom::error::ErrorKind::Tag
+                        )
+                    )),
+                };
+
+                Ok((input, kind))
+            }
+
+            pub fn encode(&self) -> [u8; 2] {
+                match self {$(
+                    $name::$kind => $tag.to_be_bytes(),
+                )*}
+            }
+        }
+    };
+
+    // fixed-length byte array tags
     ($name:ident [$len:expr] $edoc:expr; 
         $([$tag:expr] $kind:ident $($kdoc:expr)?),*$(,)?
     ) => {
@@ -119,13 +188,7 @@
         impl $name {
             pub fn parse(input: &[u8]) -> nom::IResult<&[u8], Self> {
 
-                use nom::{ 
-                    Parser, 
-                    branch::alt, 
-                    combinator::map, 
-                    character::char,
-                    bytes::complete::take,
-                };
+                use nom::bytes::complete::take;
 
                 let (input, chars) = take($len)(input)?;
                 let kind = match chars {
@@ -149,7 +212,7 @@
                 )*}
             }
         }
+    };
 
-    }
 }
 
